@@ -36,7 +36,7 @@ int main(int argc, const char *argv[])
     int imgFillWidth = 4;  // no. of digits which make up the file index (e.g. img-0001.png)
 
     // misc
-    int dataBufferSize = 2;       // no. of images which are held in memory (ring buffer) at the same time
+    int dataBufferSize = 3;       // no. of images which are held in memory (ring buffer) at the same time
     vector<DataFrame> dataBuffer; // list of data frames which are held in memory at the same time
     bool bVis = false;            // visualize results
 
@@ -62,8 +62,10 @@ int main(int argc, const char *argv[])
         // push image into data frame buffer
         DataFrame frame;
         frame.cameraImg = imgGray;
+	if(dataBuffer.size()+1 == dataBufferSize)
+	    dataBuffer.erase(dataBuffer.begin());
         dataBuffer.push_back(frame);
-
+	
         //// EOF STUDENT ASSIGNMENT
         cout << "#1 : LOAD IMAGE INTO BUFFER done" << endl;
 
@@ -71,7 +73,8 @@ int main(int argc, const char *argv[])
 
         // extract 2D keypoints from current image
         vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-        string detectorType = "SHITOMASI";
+//        string detectorType = "SHITOMASI";
+        string detectorType = "HARRIS";
 
         //// STUDENT ASSIGNMENT
         //// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable string-based selection based on detectorType
@@ -81,11 +84,20 @@ int main(int argc, const char *argv[])
         {
             detKeypointsShiTomasi(keypoints, imgGray, false);
         }
-        else
+        else if (detectorType.compare("HARRIS") == 0)
         {
-            //...
+	    detKeypointsHarris(keypoints, imgGray, false);
         }
-        //// EOF STUDENT ASSIGNMENT
+	else if ((detectorType.compare("BRIEF") == 0) ||
+		 (detectorType.compare("ORB") == 0) ||
+		 (detectorType.compare("FREAK") == 0) ||
+		 (detectorType.compare("AKAZE") == 0) ||
+		 (detectorType.compare("SIFT") == 0))
+        {
+	    detKeypointsModern(keypoints, imgGray, detectorType, false);
+        }
+	    
+//// EOF STUDENT ASSIGNMENT
 
         //// STUDENT ASSIGNMENT
         //// TASK MP.3 -> only keep keypoints on the preceding vehicle
@@ -93,15 +105,27 @@ int main(int argc, const char *argv[])
         // only keep keypoints on the preceding vehicle
         bool bFocusOnVehicle = true;
         cv::Rect vehicleRect(535, 180, 180, 150);
+	vector<cv::KeyPoint> keypoints_vehicle;
+ 
         if (bFocusOnVehicle)
         {
+	    for(auto keypoint = keypoints.begin(); keypoint != keypoints.end(); ++keypoint)
+	    {
+		if (vehicleRect.contains(keypoint->pt))
+		{
+		    cv::KeyPoint vehiclePoint(keypoint->pt, 1);
+		    keypoints_vehicle.push_back(vehiclePoint);
+		}
+	    }
+	    keypoints =  keypoints_vehicle;
+	    cout << "Vehicle has " << keypoints.size()<<" keypoints"<<endl;
             // ...
         }
 
         //// EOF STUDENT ASSIGNMENT
 
         // optional : limit number of keypoints (helpful for debugging and learning)
-        bool bLimitKpts = false;
+        bool bLimitKpts = true;
         if (bLimitKpts)
         {
             int maxKeypoints = 50;
@@ -125,7 +149,7 @@ int main(int argc, const char *argv[])
         //// -> BRIEF, ORB, FREAK, AKAZE, SIFT
 
         cv::Mat descriptors;
-        string descriptorType = "BRISK"; // BRIEF, ORB, FREAK, AKAZE, SIFT
+        string descriptorType = "BRISK"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
         descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
         //// EOF STUDENT ASSIGNMENT
 
