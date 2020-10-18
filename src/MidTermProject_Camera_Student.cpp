@@ -40,10 +40,10 @@ int main(int argc, const char *argv[])
     vector<DataFrame> dataBuffer; // list of data frames which are held in memory at the same time
     bool bVis = false;            // visualize results
 
-//    vector<string> detector_types = {"SHITOMASI", "HARRIS", "FAST", "BRISK", "ORB", "AKAZE", "SIFT"};
-//    vector<string> descriptor_types = {"BRISK", "BRIEF", "ORB", "FREAK", "AKAZE", "SIFT"};
-    vector<string> detector_types = {"SHITOMASI", "HARRIS"};
-    vector<string> descriptor_types = {"BRISK", "BRIEF"};
+    vector<string> detector_types = {"SHITOMASI", "HARRIS", "FAST", "BRISK", "ORB", "AKAZE", "SIFT"};
+    vector<string> descriptor_types = {"BRISK", "BRIEF", "ORB", "FREAK", "AKAZE", "SIFT"};
+//    vector<string> detector_types = {"SHITOMASI", "HARRIS"};
+//    vector<string> descriptor_types = {"BRISK", "BRIEF"};
 
     // Open 3 files for recording data.
     ofstream detector_file("../detectors.csv", std::ofstream::out);
@@ -52,11 +52,12 @@ int main(int argc, const char *argv[])
 
     for(auto detector_type:detector_types)
     {
-	bool write_detector = true;
+	bool write_detector_once = true;
 	for(auto descriptor_type:descriptor_types)
 	{
-	    cout << "------- DETECTOR TYPE: " << detector_type << " DESCRIPTOR TYPE: " << descriptor_type << " -------" << endl;
-	    if(write_detector)
+	    cout << "------- DETECTOR TYPE: " << detector_type;
+	    cout << " DESCRIPTOR TYPE: " << descriptor_type << " -------" << endl;
+	    if(write_detector_once)
 		detector_file << detector_type;
 	    descriptor_file << detector_type << "+" << descriptor_type;
 	    performance_file << detector_type << "+" << descriptor_type;
@@ -142,7 +143,7 @@ int main(int argc, const char *argv[])
 		    cout << "Vehicle has " << keypoints.size()<<" keypoints"<<endl;
 		    // ...
 		}
-		if(write_detector)
+		if(write_detector_once)
 		    detector_file << ", " << keypoints.size();
 
 		//// EOF STUDENT ASSIGNMENT
@@ -233,10 +234,10 @@ int main(int argc, const char *argv[])
 		}
 	    } // eof loop over all images
 		
-	    if(write_detector)
+	    if(write_detector_once)
 	    {
 		detector_file << endl;
-		write_detector = false;
+		write_detector_once = false;
 	    }
 	    descriptor_file << endl;
 	    performance_file << endl;
