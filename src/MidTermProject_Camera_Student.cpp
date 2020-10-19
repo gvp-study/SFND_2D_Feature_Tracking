@@ -31,7 +31,8 @@ int main(int argc, const char *argv[])
     string imgBasePath = dataPath + "images/";
     string imgPrefix = "KITTI/2011_09_26/image_00/data/000000"; // left camera, color
     string imgFileType = ".png";
-    int imgStartIndex = 0; // first file index to load (assumes Lidar and camera names have identical naming convention)
+    int imgStartIndex = 0; // first file index to load (assumes Lidar and camera names have
+                           // identical naming convention)
     int imgEndIndex = 9;   // last file index to load
     int imgFillWidth = 4;  // no. of digits which make up the file index (e.g. img-0001.png)
 
@@ -55,11 +56,12 @@ int main(int argc, const char *argv[])
 	{
 	    /* MAIN LOOP OVER ALL IMAGES */
 
-	    cout << "------- DETECTOR TYPE: " << detector_type;
-	    cout << " DESCRIPTOR TYPE: " << descriptor_type << " -------" << endl;
-
+	    // AKAZE and SIFT descriptors dont seem to work!
 	    if((descriptor_type.compare("AKAZE") == 0 || descriptor_type.compare("SIFT") == 0))
 		continue;
+
+	    cout << "------- DETECTOR TYPE: " << detector_type;
+	    cout << " DESCRIPTOR TYPE: " << descriptor_type << " -------" << endl;
 
 	    if(write_detector_once)
 		detector_file << detector_type;
@@ -182,7 +184,7 @@ int main(int argc, const char *argv[])
 		//// -> BRIEF, ORB, FREAK, AKAZE, SIFT
 
 		cv::Mat descriptors;
-		string descriptorType = descriptor_type; // "BRISK"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
+		string descriptorType = descriptor_type; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
 		descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg,
 			      descriptors, descriptorType);
 		//// EOF STUDENT ASSIGNMENT
