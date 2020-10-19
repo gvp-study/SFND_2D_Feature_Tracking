@@ -14,7 +14,7 @@ The idea of the camera course is to build a collision detection system - that's 
 
 ### Task MP.1
 This task is to set up a ring buffer to load the images that are needed to track the features. I implemented this using a ring buffer of size 3 as shown below.
-```
+```cpp
 int dataBufferSize = 3;   
 vector<DataFrame> dataBuffer;
 //...
@@ -26,7 +26,7 @@ dataBuffer.push_back(frame);
 ### TASK MP.2
 The second task is to detect keypoints in the series of given images using OpenCV methods. The type of detectors used are  SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, and SIFT. I modified the detKeyPointsModern() function to create the appropriate OpenCV detector and then use it to find the features in it as shown below.
 
-```
+```cpp
 vector<string> detector_types = {"SHITOMASI", "HARRIS", "FAST", "BRISK", "ORB", "AKAZE", "SIFT"};
 ...
 void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std::string detectorType, bool bVis)
@@ -46,7 +46,7 @@ The third part of the project is to limit the features detected by the detect ke
 
 I used the OpenCV Rectdatatype for the bounding box with the following parameters : cx = 535, cy = 180, w = 180, h = 150.
 
-```
+```cpp
 cv::Rect vehicleRect(535, 180, 180, 150);
 vector<cv::KeyPoint> keypoints_vehicle;
 
@@ -68,7 +68,7 @@ if (bFocusOnVehicle)
 ```
 ### TASK MP.4
 The fourth task is to implement a variety of keypoint descriptors to the already implemented BRISK methods. These methods (BRIEF, ORB, FREAK, AKAZE and SIFT) are chosen based on the descriptor_types string. I changed the descKeypoints() function to call the OpenCV function to create the appropriate descriptor and compute it as shown below.
-```
+```cpp
 vector<string> descriptor_types = {"BRISK", "BRIEF", "ORB", "FREAK", "AKAZE", "SIFT"};
 //...
 string descriptorType2 = "DES_BINARY"; // DES_BINARY, DES_HOG
@@ -95,8 +95,9 @@ void descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descr
 }
 ```
 ### TASK MP.5
-The fifth task focuses on the matching part. I modified the matchDescriptors function to add FLANN as an alternative to brute-force as well as the K-Nearest-Neighbor approach. The matche is created with the appropriate OpenCV functions and then matched with the selectorType as shown below.
-```
+The fifth task focuses on the matching part. I modified the matchDescriptors function to add FLANN as an alternative to brute-force for the matcher. After the matches are found some of the matches can be selected using the standard best match approach and the K-Nearest-Neighbor (KNN) approach as shown below. The KNN method seems to be eliminating about 50-60 matches and reduces the computaion load.
+Note: An OpenCV bug workaround had to be used to overcome an issue with the cv::Mat::type().
+```cpp
 void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::KeyPoint> &kPtsRef,
 		      cv::Mat &descSource, cv::Mat &descRef,
                       std::vector<cv::DMatch> &matches, std::string descriptorType,
@@ -113,7 +114,7 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
     else if (matcherType.compare("MAT_FLANN") == 0)
     {
       // OpenCV bug workaround : convert binary descriptors to floating point due to a bug in current OpenCV implementation
-      if (descSource.type() != CV_32F)
+      if (descSource.type() != CV_32F || descRef.type() != CV_32F)
       {
         descSource.convertTo(descSource, CV_32F);
         descRef.convertTo(descRef, CV_32F);
@@ -147,8 +148,8 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
 
 ```
 ### TASK MP.6
-The sixth task is to implement the descriptor distance ratio test as a filtering method to remove bad keypoint matches. This is done in by setting the minDescDistRation to 0.8 and checking the match distances.
-```
+The sixth task is to implement the descriptor distance ratio test as a filtering method to remove bad keypoint matches. This is done by setting the minDescDistRatio to 0.8 and checking the match distances between features in successive frames.
+```cpp
 else if (selectorType.compare("SEL_KNN") == 0)
 { // k nearest neighbors (k=2)
 
@@ -172,27 +173,45 @@ The seventh task is to count the number of keypoints on the preceding vehicle fo
 The result is in this file [detectors.csv](<file://./detectors.csv>).
 The summary below shows that the FAST detector detects the maximum number of features while the HARRIS finds the least number of features.
 
-SHITOMASI	111-125
-
-HARRIS 14-43
-
-FAST 386-427
-
-BRISK	254-297
-
-ORB	92-130
-
-AKAZE	155-179
-
-SIFT	124-159
+| Detector | No of Matches |
+|----------|--------------:|
+| SHITOMASI |	111-125 |
+| HARRIS | 14-43 |
+| FAST | 386-427 |
+| BRISK	| 254-297 |
+| ORB	| 92-130 |
+| AKAZE	| 155-179 |
+| SIFT	| 124-159 |
 
 ### TASK MP.8
-The eighth task is to count the number of matched keypoints for all 10 images using all possible combinations of detectors and descriptors. The result is shown in this file [descriptors.csv](<file://descriptors.csv>).
+The eighth task is to count the number of matched keypoints for all 10 images using all possible combinations of detectors and descriptors. The result is a table of 35 combinations as shown in this file [descriptors.csv](<file://./descriptors.csv>). The FAST detector still seems to find the maximum number of matched features between images.
 
+| Rank | Detector+Descriptor | No of Matches |
+|------|:-------------------:|------|
+| 1 | FAST+SIFT| 260 |
+| 2 | FAST+BRIEF	| 230 |
+| 3 | FAST+BRISK	| 221 |
 
+The code to do the combinations of detector+descriptors is shown below. I used two nested loops with one for the detectors and the other for the descriptors as shown below. Exception was made for the AKAZE detector which did not seem to work with any other detector.
+```cpp
+vector<string> detector_types = {"SHITOMASI", "HARRIS", "FAST", "BRISK", "ORB", "AKAZE", "SIFT"};
+vector<string> descriptor_types = {"BRISK", "BRIEF", "ORB", "FREAK", "AKAZE", "SIFT"};
+
+for(auto detector_type:detector_types)
+{
+//...
+  for(auto descriptor_type:descriptor_types)
+  {
+//...
+  }
+}
+```
 
 ### TASK MP.9
-The ninth task is to log the time it takes for keypoint detection and descriptor extraction. The results of the data collected is in this file [performance.csv](<file://./performance.csv>). Based on this analysis, I would recommend these three combination of detector/descriptors in this order.
-1. FAST+BRIEF	10.68 ms
-2. ORB+BRIEF	10.69 ms
-3. FAST+ORB	  11.37 ms
+The ninth task is to log the time it takes for all combinations of the keypoint detection and descriptor extraction. The results is a table of 35 combinations and is in this file [performance.csv](<file://./performance.csv>). Based on this analysis, I would recommend these three combination of detector/descriptors in this order.
+
+| Rank | Detector+Descriptor | Time |
+|------|:-------------------:|------|
+| 1 | FAST+BRIEF| 10.68 ms |
+| 2 | ORB+BRIEF	| 10.69 ms |
+| 3 | FAST+ORB	| 11.37 ms |
