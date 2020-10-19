@@ -170,7 +170,7 @@ else if (selectorType.compare("SEL_KNN") == 0)
 ```
 ### TASK MP.7
 The seventh task is to count the number of keypoints on the preceding vehicle for all 10 images and take note of the distribution of their neighborhood size. This is done for all the detectors in the list.
-The result is in this file [detectors.csv](<file://./detectors.csv>).
+The result is in this file [detectors.csv](./detectors.csv).
 The summary below shows that the FAST detector detects the maximum number of features while the HARRIS finds the least number of features.
 
 | Detector | No of Matches |
@@ -184,7 +184,7 @@ The summary below shows that the FAST detector detects the maximum number of fea
 | SIFT	| 124-159 |
 
 ### TASK MP.8
-The eighth task is to count the number of matched keypoints for all 10 images using all possible combinations of detectors and descriptors. The result is a table of 35 combinations as shown in this file [descriptors.csv](<file://./descriptors.csv>). The FAST detector still seems to find the maximum number of matched features between images.
+The eighth task is to count the number of matched keypoints for all 10 images using all possible combinations of detectors and descriptors. The result is a table of 35 combinations as shown in this file [descriptors.csv](./descriptors.csv). The FAST detector still seems to find the maximum number of matched features between images.
 
 | Rank | Detector+Descriptor | No of Matches |
 |------|:-------------------:|------|
