@@ -56,8 +56,8 @@ int main(int argc, const char *argv[])
 	{
 	    /* MAIN LOOP OVER ALL IMAGES */
 
-	    // AKAZE and SIFT descriptors dont seem to work!
-	    if((descriptor_type.compare("AKAZE") == 0 || descriptor_type.compare("SIFT") == 0))
+	    // AKAZE descriptors dont seem to work!
+	    if((descriptor_type.compare("AKAZE") == 0))
 		continue;
 
 	    cout << "------- DETECTOR TYPE: " << detector_type;
