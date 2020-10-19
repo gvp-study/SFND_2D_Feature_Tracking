@@ -1,6 +1,6 @@
 # SFND 2D Feature Tracking
 ## George V. Paul
-https://github.com/gvp-study/SFND_2D_Feature_Tracking
+[Github link to this project is here](https://github.com/gvp-study/SFND_2D_Feature_Tracking)
 
 
 <img src="images/keypoints.png" width="820" height="248" />
@@ -38,13 +38,39 @@ if(detectorType.compare("FAST") == 0)
    detector = cv::FastFeatureDetector::create();
    detector->detect(img, keypoints);
 }
+else if(detectorType.compare("BRISK") == 0)
+{
+    detector = cv::BRISK::create();
+    detector->detect(img, keypoints);
+}
+else if(detectorType.compare("ORB") == 0)
+{
+    detector = cv::ORB::create();
+    detector->detect(img, keypoints);
+}
+else if(detectorType.compare("AKAZE") == 0)
+{
+    detector = cv::AKAZE::create();
+    detector->detect(img, keypoints);   
+}
+else if(detectorType.compare("SIFT") == 0)
+{
+    detector = cv::SIFT::create();
+    detector->detect(img, keypoints);        
+}
+else
+{
+    throw invalid_argument(detectorType +
+         " is not a valid detectorType. Try FAST, BRISK, ORB, AKAZE, SIFT.");
+}
+
 ...
 
 ```
 ### TASK MP.3
-The third part of the project is to limit the features detected by the detect keypoints function to a bounding box enclosing the preceding vehicle.
+The third part of the project is to limit the features detected by the detect keypoints function to a bounding box enclosing only the preceding vehicle in the same lane.
 
-I used the OpenCV Rectdatatype for the bounding box with the following parameters : cx = 535, cy = 180, w = 180, h = 150.
+I used the OpenCV Rectdatatype for the bounding box with the following parameters : cx = 535, cy = 180, w = 180, h = 150. All keypoints found to lie outside this box are rejected from further processing.
 
 ```cpp
 cv::Rect vehicleRect(535, 180, 180, 150);
@@ -67,7 +93,11 @@ if (bFocusOnVehicle)
 
 ```
 ### TASK MP.4
-The fourth task is to implement a variety of keypoint descriptors to the already implemented BRISK methods. These methods (BRIEF, ORB, FREAK, AKAZE and SIFT) are chosen based on the descriptor_types string. I changed the descKeypoints() function to call the OpenCV function to create the appropriate descriptor and compute it as shown below.
+The fourth task is to implement a variety of keypoint descriptors in addition to the already implemented BRISK method . These methods (BRIEF, ORB, FREAK, AKAZE and SIFT) are chosen based on the descriptor_types string.
+
+I also set the selectorType to use the BINARY or HOG variations of the match based on the descriptor type.
+
+I changed the descKeypoints() function to call the OpenCV function to create the appropriate descriptor and compute it as shown below.
 ```cpp
 vector<string> descriptor_types = {"BRISK", "BRIEF", "ORB", "FREAK", "AKAZE", "SIFT"};
 //...
@@ -83,20 +113,46 @@ matchDescriptors((dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keyp
 void descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descriptors,
 		   string descriptorType)
 {
-  cv::Ptr<cv::DescriptorExtractor> extractor;
-//...
+  if (descriptorType.compare("BRISK") == 0)
+  {
+      int threshold = 30;        // FAST/AGAST detection threshold score.
+      int octaves = 3;           // detection octaves (use 0 to do single scale)
+      float patternScale = 1.0f; // apply this scale to the pattern used for sampling
+                           // the neighbourhood of a keypoint.
+
+      extractor = cv::BRISK::create(threshold, octaves, patternScale);
+  }
   else if(descriptorType.compare("ORB") == 0)
   {
-    extractor = cv::ORB::create();
+      extractor = cv::ORB::create();
   }
-//...
+  else if(descriptorType.compare("AKAZE") == 0)
+  {
+      extractor = cv::AKAZE::create();
+  }
+  else if(descriptorType.compare("SIFT") == 0)
+  {
+      extractor = cv::SIFT::create();
+  }
+  else if(descriptorType.compare("FREAK") == 0)
+  {
+      extractor = cv::xfeatures2d::FREAK::create();
+  }
+  else if(descriptorType.compare("BRIEF") == 0)
+  {
+      extractor = cv::xfeatures2d::BriefDescriptorExtractor::create();
+  }
+
+  // perform feature description
+  double t = (double)cv::getTickCount();
   extractor->compute(img, keypoints, descriptors);
 //...
 }
 ```
 ### TASK MP.5
-The fifth task focuses on the matching part. I modified the matchDescriptors function to add FLANN as an alternative to brute-force for the matcher. After the matches are found some of the matches can be selected using the standard best match approach and the K-Nearest-Neighbor (KNN) approach as shown below. The KNN method seems to be eliminating about 50-60 matches and reduces the computaion load.
-Note: An OpenCV bug workaround had to be used to overcome an issue with the cv::Mat::type().
+The fifth task focuses on the matching part. I modified the matchDescriptors function to add FLANN as an alternative to brute-force (BF) for the matcher. After the matches are found some of the matches can be selected using the standard best match approach or the K-Nearest-Neighbor (KNN) approach as shown below. The KNN method seems to be useful in eliminating about 50-60 matches and reducing the computation.
+
+Note: An OpenCV bug workaround had to be used to overcome an issue with the cv::Mat::type() during this step.
 ```cpp
 void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::KeyPoint> &kPtsRef,
 		      cv::Mat &descSource, cv::Mat &descRef,
@@ -192,7 +248,9 @@ The eighth task is to count the number of matched keypoints for all 10 images us
 | 2 | FAST+BRIEF	| 230 |
 | 3 | FAST+BRISK	| 221 |
 
-The code to do the combinations of detector+descriptors is shown below. I used two nested loops with one for the detectors and the other for the descriptors as shown below. Exception was made for the AKAZE detector which did not seem to work with any other detector.
+The code to do the combinations of detector+descriptors is shown below. I used two nested loops with one for the detectors and the other for the descriptors as shown below.
+
+Exception was made for the AKAZE detector which did not seem to work with any other detector.
 ```cpp
 vector<string> detector_types = {"SHITOMASI", "HARRIS", "FAST", "BRISK", "ORB", "AKAZE", "SIFT"};
 vector<string> descriptor_types = {"BRISK", "BRIEF", "ORB", "FREAK", "AKAZE", "SIFT"};
