@@ -115,7 +115,8 @@ int main(int argc, const char *argv[])
 		{
 		    detKeypointsHarris(keypoints, imgGray, false);
 		}
-		else if ((detectorType.compare("BRISK") == 0) ||
+		else if ((detectorType.compare("FAST") == 0) ||
+			 (detectorType.compare("BRISK") == 0) ||
 			 (detectorType.compare("ORB") == 0) ||
 			 (detectorType.compare("FREAK") == 0) ||
 			 (detectorType.compare("AKAZE") == 0) ||
@@ -160,7 +161,8 @@ int main(int argc, const char *argv[])
 		    int maxKeypoints = 50;
 
 		    if (detectorType.compare("SHITOMASI") == 0)
-		    { // there is no response info, so keep the first 50 as they are sorted in descending quality order
+		    {   // there is no response info, so keep the first 50 as they are sorted
+			// in descending quality order
 			keypoints.erase(keypoints.begin() + maxKeypoints, keypoints.end());
 		    }
 		    cv::KeyPointsFilter::retainBest(keypoints, maxKeypoints);
@@ -181,7 +183,8 @@ int main(int argc, const char *argv[])
 
 		cv::Mat descriptors;
 		string descriptorType = descriptor_type; // "BRISK"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
-		descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
+		descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg,
+			      descriptors, descriptorType);
 		//// EOF STUDENT ASSIGNMENT
 
 		// push descriptors for current frame to end of data buffer
