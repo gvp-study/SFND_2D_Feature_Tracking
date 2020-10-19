@@ -42,8 +42,6 @@ int main(int argc, const char *argv[])
 
     vector<string> detector_types = {"SHITOMASI", "HARRIS", "FAST", "BRISK", "ORB", "AKAZE", "SIFT"};
     vector<string> descriptor_types = {"BRISK", "BRIEF", "ORB", "FREAK", "AKAZE", "SIFT"};
-//    vector<string> detector_types = {"SHITOMASI", "HARRIS"};
-//    vector<string> descriptor_types = {"BRISK", "BRIEF"};
 
     // Open 3 files for recording data.
     ofstream detector_file("../detectors.csv", std::ofstream::out);
@@ -55,19 +53,26 @@ int main(int argc, const char *argv[])
 	bool write_detector_once = true;
 	for(auto descriptor_type:descriptor_types)
 	{
+	    /* MAIN LOOP OVER ALL IMAGES */
+
 	    cout << "------- DETECTOR TYPE: " << detector_type;
 	    cout << " DESCRIPTOR TYPE: " << descriptor_type << " -------" << endl;
+
+	    if((descriptor_type.compare("AKAZE") == 0 || descriptor_type.compare("SIFT") == 0))
+		continue;
+
 	    if(write_detector_once)
 		detector_file << detector_type;
 	    descriptor_file << detector_type << "+" << descriptor_type;
 	    performance_file << detector_type << "+" << descriptor_type;
-	    /* MAIN LOOP OVER ALL IMAGES */
 
+	    dataBuffer.clear();
+	    
 	    for (size_t imgIndex = 0; imgIndex <= imgEndIndex - imgStartIndex; imgIndex++)
 	    {
 		double tim = (double)cv::getTickCount();
 		/* LOAD IMAGE INTO BUFFER */
-
+		
 		// assemble filenames for current index
 		ostringstream imgNumber;
 		imgNumber << setfill('0') << setw(imgFillWidth) << imgStartIndex + imgIndex;
@@ -95,7 +100,7 @@ int main(int argc, const char *argv[])
 
 		// extract 2D keypoints from current image
 		vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-		string detectorType = "BRISK"; //"SHITOMASI"; "HARRIS";
+		string detectorType = detector_type; //"BRISK"; //"SHITOMASI"; "HARRIS";
 
 		//// STUDENT ASSIGNMENT
 		//// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable
@@ -175,7 +180,7 @@ int main(int argc, const char *argv[])
 		//// -> BRIEF, ORB, FREAK, AKAZE, SIFT
 
 		cv::Mat descriptors;
-		string descriptorType = "BRISK"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
+		string descriptorType = descriptor_type; // "BRISK"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
 		descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
 		//// EOF STUDENT ASSIGNMENT
 
@@ -191,16 +196,19 @@ int main(int argc, const char *argv[])
 
 		    vector<cv::DMatch> matches;
 		    string matcherType = "MAT_BF";        // MAT_BF, MAT_FLANN
-		    string descriptorType = "DES_BINARY"; // DES_BINARY, DES_HOG
-		    string selectorType = "SEL_NN";       // SEL_NN, SEL_KNN
+		    string descriptorType2 = "DES_BINARY"; // DES_BINARY, DES_HOG
+		    string selectorType = "SEL_KNN";       // SEL_NN, SEL_KNN
+		    if(descriptorType.compare("SIFT") == 0)
+			descriptorType2 = "DES_HOG";
 
 		    //// STUDENT ASSIGNMENT
 		    //// TASK MP.5 -> add FLANN matching in file matching2D.cpp
-		    //// TASK MP.6 -> add KNN match selection and perform descriptor distance ratio filtering with t=0.8 in file matching2D.cpp
+		    //// TASK MP.6 -> add KNN match selection and perform descriptor distance
+		    ////              ratio filtering with t=0.8 in file matching2D.cpp
 
 		    matchDescriptors((dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints,
 				     (dataBuffer.end() - 2)->descriptors, (dataBuffer.end() - 1)->descriptors,
-				     matches, descriptorType, matcherType, selectorType);
+				     matches, descriptorType2, matcherType, selectorType);
 
 		    //// EOF STUDENT ASSIGNMENT
 
@@ -214,7 +222,7 @@ int main(int argc, const char *argv[])
 		    cout << "#4 : MATCH KEYPOINT DESCRIPTORS done" << endl;
 
 		    // visualize matches between current and previous image
-		    bVis = true;
+		    bVis = false;//true;
 		    if (bVis)
 		    {
 			cv::Mat matchImg = ((dataBuffer.end() - 1)->cameraImg).clone();
