@@ -208,7 +208,7 @@ for(auto detector_type:detector_types)
 ```
 
 ### TASK MP.9
-The ninth task is to log the time it takes for all combinations of the keypoint detection and descriptor extraction. The results is a table of 35 combinations and is in this file [performance.csv](<file://./performance.csv>). Based on this analysis, I would recommend these three combination of detector/descriptors in this order.
+The ninth task is to log the time it takes for all combinations of the keypoint detection and descriptor extraction. The results is a table of 35 combinations and is in this file [performance.csv](./performance.csv). Based on this analysis, I would recommend these three combination of detector/descriptors in this order.
 
 | Rank | Detector+Descriptor | Time |
 |------|:-------------------:|------|
