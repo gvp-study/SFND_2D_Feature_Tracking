@@ -191,6 +191,6 @@ The eighth task is to count the number of matched keypoints for all 10 images us
 
 ### TASK MP.9
 The ninth task is to log the time it takes for keypoint detection and descriptor extraction. The results of the data collected is in this file [performance.csv](<file://performance.csv>). Based on this analysis, I would recommend these three combination of detector/descriptors in this order.
-1. FAST+BRIEF	6.77
-2. FAST+ORB	10.62
-3. SHITOMASI+BRIEF	11.10
+1. FAST+BRIEF	6.85
+2. FAST+ORB	7.90
+3. ORB+BRIEF	9.73
