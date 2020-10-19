@@ -169,7 +169,7 @@ else if (selectorType.compare("SEL_KNN") == 0)
 ```
 ### TASK MP.7
 The seventh task is to count the number of keypoints on the preceding vehicle for all 10 images and take note of the distribution of their neighborhood size. This is done for all the detectors in the list.
-The result is in this file [detectors.csv](<file://detectors.csv>).
+The result is in this file [detectors.csv](<file://./detectors.csv>).
 The summary below shows that the FAST detector detects the maximum number of features while the HARRIS finds the least number of features.
 
 SHITOMASI	111-125
@@ -187,10 +187,12 @@ AKAZE	155-179
 SIFT	124-159
 
 ### TASK MP.8
-The eighth task is to count the number of matched keypoints for all 10 images using all possible combinations of detectors and descriptors. The result is shown in this file [descriptors.csv](<file://descriptors.csv>).
+The eighth task is to count the number of matched keypoints for all 10 images using all possible combinations of detectors and descriptors. The result is shown in this file [descriptors.csv](<file://./descriptors.csv>).
+
+
 
 ### TASK MP.9
-The ninth task is to log the time it takes for keypoint detection and descriptor extraction. The results of the data collected is in this file [performance.csv](<file://performance.csv>). Based on this analysis, I would recommend these three combination of detector/descriptors in this order.
+The ninth task is to log the time it takes for keypoint detection and descriptor extraction. The results of the data collected is in this file [performance.csv](<file://./performance.csv>). Based on this analysis, I would recommend these three combination of detector/descriptors in this order.
 1. FAST+BRIEF	10.68 ms
 2. ORB+BRIEF	10.69 ms
 3. FAST+ORB	  11.37 ms
