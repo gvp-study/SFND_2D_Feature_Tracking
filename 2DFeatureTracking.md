@@ -187,7 +187,7 @@ AKAZE	155-179
 SIFT	124-159
 
 ### TASK MP.8
-The eighth task is to count the number of matched keypoints for all 10 images using all possible combinations of detectors and descriptors. The result is shown in this file [descriptors.csv](<file://./descriptors.csv>).
+The eighth task is to count the number of matched keypoints for all 10 images using all possible combinations of detectors and descriptors. The result is shown in this file [descriptors.csv](<file://descriptors.csv>).
 
 
 
